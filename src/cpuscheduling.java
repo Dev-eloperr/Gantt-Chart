@@ -9,9 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 class cpuscheduling extends JFrame {
     private cpuscheduling(){
@@ -344,66 +342,203 @@ class draw_graph extends JPanel{
         if(chart.checkbox[1]==1){
             g.setColor(Color.black);
             g.drawString("Round Robin",2,(int)(2*(height/6)-10));
-            ArrayList<Integer> seq = new ArrayList<Integer>();
-            int[] ct_rr = new int[chart.n];
+            ArrayList<Integer> seq = new ArrayList<>();
+            int[] tat_rr = new int[chart.n];
             int[] wt_rr = new int[chart.n];
-            roundRobin(chart.at_arr,chart.bt_arr,chart.n,seq,ct_rr,wt_rr);
-            for (i=0;i<ct_rr.length;i++)
-                System.out.println("Comp rr: "+ct_rr[i]+" wait rr: "+wt_rr[i]);
+            int n= chart.n;
+            int sum_bt=0;
+            for (i=0;i<chart.bt_arr.length;i++)
+                sum_bt+=chart.bt_arr[i];
+
+                String[] p = new String[]{"1","2","3","4","5","6"};
+                int copy_bt_arr[] = new int[n];
+                int copy_at_arr[] = new int[n];
+                int q=chart.timeQ;
+                int widq=(int)(width/(2*sum_bt))*q;
+                int widt=(int)(width/(2*sum_bt))*q;
+            System.out.println(widq);
+                int var_x=0;
+                System.out.println(q);
+                for (int x = 0; x < copy_bt_arr.length; x++) {
+                    copy_bt_arr[x] = chart.bt_arr[x];
+                    copy_at_arr[x] = chart.at_arr[x];
+                }
+                int t = 0;
+                ArrayList<Integer> ct_rr= new ArrayList<>();
+                while (true) {
+                    boolean flag = true;
+                    for (int x = 0; x < n; x++) {
+                        if (copy_at_arr[x] <= t) {
+                            if (copy_at_arr[x] <= q) {
+                                if (copy_bt_arr[x] > 0) {
+                                    flag = false;
+                                    if (copy_bt_arr[x] > q) {
+                                        // make decrease the bt_arr time
+                                        t = t + q;
+                                        System.out.println(" t: "+t);
+                                        ct_rr.add(t);
+                                        copy_bt_arr[x] = copy_bt_arr[x] - q;
+                                        copy_at_arr[x] = copy_at_arr[x] + q;
+                                        seq.add(Integer.parseInt(p[x]));
+                                        //g.drawString(seq.get(seq.size()-1),x,y);
+                                        //var_x=t*widq/q;
+                                        //g.fillRect(var_x,(int)(height/6),widq,(int)(height/6)-50);
+                                    }
+                                    else {
+                                        // for last time
+                                        t = t + copy_bt_arr[x];
+                                        System.out.println(" t: "+t);
+                                        ct_rr.add(t);
+                                        // store tat_rr time
+                                        tat_rr[x] = t - chart.at_arr[x];
+                                        // store wait time
+                                        wt_rr[x] = tat_rr[x] - chart.bt_arr[x];
+                                        //copy_bt_arr[x] = 0;
+
+                                        // add sequence
+                                        seq.add(Integer.parseInt(p[x]));
+                                        //widt=(int)(width/(2*sum_bt))*(copy_bt_arr[x]);
+                                        //var_x=t*widt/(copy_bt_arr[x]);
+                                        copy_bt_arr[x] = 0;
+                                        //g.fillRect(var_x,(int)height/6,widt,(int)height/6-50);
+                                    }
+                                }
+                            }
+
+
+                            else if (copy_at_arr[x] > q) {
+                                for (int j = 0; j < n; j++) {
+
+                                    if (copy_at_arr[j] < copy_at_arr[x]) {
+                                        if (copy_bt_arr[j] > 0) {
+                                            flag = false;
+                                            if (copy_bt_arr[j] > q) {
+                                                t = t + q;
+                                                System.out.println(" t: "+t);
+                                                ct_rr.add(t);
+                                                copy_bt_arr[j] = copy_bt_arr[j] - q;
+                                                copy_at_arr[j] = copy_at_arr[j] + q;
+                                                seq.add(Integer.parseInt(p[j]));
+
+                                                //widt=(int)(width/(2*sum_bt))*q;
+                                                //var_x=t*widt/q;
+                                                //g.fillRect(var_x,(int)height/6,widt,(int)height/6-50);
+                                            }
+                                            else {
+                                                t = t + copy_bt_arr[j];
+                                                System.out.println(" t: "+t);
+                                                ct_rr.add(t);
+                                                tat_rr[j] = t - chart.at_arr[j];
+                                                wt_rr[j] = t - chart.bt_arr[j] - chart.at_arr[j];
+                                                //copy_bt_arr[j] = 0;
+                                                seq.add(Integer.parseInt(p[j]));
+
+                                                //widt=(int)(width/(2*sum_bt))*(copy_bt_arr[j]);
+                                                //var_x=t*widt/(copy_bt_arr[j]);
+                                                copy_bt_arr[j] = 0;
+                                                //g.fillRect(var_x,(int)height/6,widt,(int)height/6-50);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // now the previous process according to
+                                // ith is process
+                                if (copy_bt_arr[x] > 0) {
+                                    flag = false;
+
+                                    // Check for greaters
+                                    if (copy_bt_arr[x] > q) {
+                                        t = t + q;
+                                        System.out.println(" t: "+t);
+                                        ct_rr.add(t);
+                                        copy_bt_arr[x] = copy_bt_arr[x] - q;
+                                        copy_at_arr[x] = copy_at_arr[x] + q;
+                                        seq.add(Integer.parseInt(p[x]));
+                                        //var_x=t*widq/q;
+                                        //g.fillRect(var_x,(int)(height/6),widq,(int)(height/6)-50);
+                                    }
+                                    else {
+                                        t = t + copy_bt_arr[x];
+                                        System.out.println(" t: "+t);
+                                        ct_rr.add(t);
+                                        tat_rr[x] = t - chart.at_arr[x];
+                                        wt_rr[x] = t - chart.bt_arr[x] - chart.at_arr[x];
+                                        //copy_bt_arr[x] = 0;
+                                        seq.add(Integer.parseInt(p[x]));
+                                        //widt=(int)(width/(2*sum_bt))*(copy_bt_arr[x]);
+                                        //var_x=t*widt/(copy_bt_arr[x]);
+                                        copy_bt_arr[x] = 0;
+                                        //g.fillRect(var_x,(int)height/6,widt,(int)height/6-50);
+                                    }
+                                }
+                            }
+
+                        }
+
+                        // if no process is come on thse critical
+                        else if (copy_at_arr[x] > t) {
+                            t++;
+                            x--;
+                        }
+                    }
+                    // for exit the while loop
+                    if (flag) {
+                        break;
+                    }
+                }
+                int sum=ct_rr.get(ct_rr.size()-1);
+                for(i=0;i<ct_rr.size();i++) {
+                    Random rand = new Random();
+                    float rs = rand.nextFloat();
+                    float gs = rand.nextFloat();
+                    float bs = rand.nextFloat();
+                    if(i==0) {
+                        g.setColor(Color.getHSBColor(rs, gs, bs));
+                        System.out.println("Width for 0th : "+(int)(((width * ct_rr.get(i) / (2 * sum)) - (width * chart.at_arr[i] / (2 * sum)))));
+                        g.fillRect(0, (int)height/6, (int) ((width * ct_rr.get(i) / (2 * sum)) - (width * chart.at_arr[i] / (2 * sum))), (int) ((height / 6)) - 50);
+                        g.drawString("P"+seq.get(i)+" " + chart.at_arr[i], 0, (int) (2*(height / 6) - 25));
+                    }
+                    else {
+                        g.setColor(Color.getHSBColor(rs, gs, bs));
+                        System.out.println("x_coor: "+(int)(width * ct_rr.get(i-1) / (2 * sum))+"width : "+(int) ((width * ct_rr.get(i) / (2 * sum)) - (width * ct_rr.get(i - 1) / (2 * sum))));
+                        g.fillRect((int) (width * ct_rr.get(i-1) / (2 * sum)), (int)height/6, (int) ((width * ct_rr.get(i) / (2 * sum)) - (width * ct_rr.get(i - 1) / (2 * sum))), (int) ((height / 6)) - 50);
+                        g.drawString("P" + seq.get(i)+" "+ct_rr.get(i), (int) (width * ct_rr.get(i - 1) / (2 * sum)), (int) (2*(height / 6) - 25));
+                    }
+                }
+                //Round Robin Graph Printing ends here
+            for (i=0;i<tat_rr.length;i++)
+                System.out.println("tat rr: "+tat_rr[i]+" wait rr: "+wt_rr[i]);
             //for(i=0;i<seq.length();i++)
                 System.out.println("Sequence is : "+seq);
-
-            /*
-            WaitTimeFCFS(chart.n,chart.bt_arr,chart.at_arr,wt_fcfs,service_time);
-            int sum=service_time[service_time.length-1]+chart.bt_arr[chart.n-1];
-            System.out.println(sum);
-            for(i=0;i<service_time.length;i++){
-                copy_service[i]=service_time[i];
-            }
-            copy_service[i]=sum;
-            for(i=1;i<copy_service.length;i++){
-                Random rand = new Random();
-                float rs = rand.nextFloat();
-                float gs = rand.nextFloat();
-                float bs = rand.nextFloat();
-                g.setColor(Color.getHSBColor(rs,gs,bs));
-                System.out.println((int)(width*copy_service[i]/(2*sum)));
-                g.fillRect((int)(width*copy_service[i-1]/(2*sum)),0,(int)((width*copy_service[i]/(2*sum))-(width*copy_service[i-1]/(2*sum))),(int)((height/total_selected))-50);
-                g.drawString("P"+i+":"+service_time[i-1],(int)(width*copy_service[i-1]/(2*sum)),(int)((height/total_selected)-25));
-            }
-            */
             //Print of WT,AWT,TAT,ATAT
             g.setColor(Color.black);
             g.drawString("Average Waiting Time: ",(int)((width/2)+5),20+(int)(height/6));
             int x=0;
-            for(i=0;i<wt_fcfs.length;i++) {
+            for(i=0;i<wt_rr.length;i++) {
                 x = i + 1;
-                g.drawString("P" + x + ":" + wt_fcfs[i] + "  ", (int) (((width / 2)+50) + 100 * (i + 1)), 20+(int)(height/6));
+                g.drawString("P" + x + ":" + wt_rr[i] + "  ", (int) (((width / 2)+50) + 100 * (i + 1)), 20+(int)(height/6));
             }
             g.drawString("Average WT: ",(int)((width/2)+5),40+(int)(height/6));
             double awt=0;
-            for (i=0;i<wt_fcfs.length;i++){
-                awt+=wt_fcfs[i];
+            for (i=0;i<wt_rr.length;i++){
+                awt+=wt_rr[i];
             }
-            System.out.println("awt is :"+awt);
             awt=awt/chart.n;
             g.drawString(awt+"",(int)((width/2)+150),40+(int)(height/6));
 
-
             g.drawString("Turn around Time: ",(int)((width/2)+5),60+(int)(height/6));
-            for(i=0;i<wt_fcfs.length;i++) {
+            for(i=0;i<tat_rr.length;i++) {
                 x = i + 1;
-                g.drawString("P" + x + ": " + wt_fcfs[i] + " ", (int) (((width / 2)+50) + 100 * (i + 1)), 60+(int)(height/6));
+                g.drawString("P" + x + ": " + tat_rr[i] + " ", (int) (((width / 2)+50) + 100 * (i + 1)), 60+(int)(height/6));
             }
             g.drawString("Average TAT: ",(int)((width/2)+5),80+(int)(height/6));
-            double avg_tat_fcfs=0;
+            double avg_tat_rr=0;
             for (i=0;i<tat_fcfs.length;i++){
-                avg_tat_fcfs+=tat_fcfs[i];
+                avg_tat_rr+=tat_rr[i];
             }
-            System.out.println("avgtat is :"+avg_tat_fcfs);
-            avg_tat_fcfs=avg_tat_fcfs/chart.n;
-            g.drawString(avg_tat_fcfs+"",(int)((width/2)+150),80);
-
+            avg_tat_rr=avg_tat_rr/chart.n;
+            g.drawString(avg_tat_rr+"",(int)((width/2)+150),80+(int)(height/6));
         }
 
     }
@@ -429,107 +564,6 @@ class draw_graph extends JPanel{
     static void TatFcfs(int n, int bt_arr[],int wt_fcfs[], int tat_fcfs[]) {
         for (int i = 0; i < n ; i++)
             tat_fcfs[i] = bt_arr[i] + wt_fcfs[i];
-    }
-    public static void roundRobin( int at_arr[], int bt_arr[], int n,ArrayList<Integer> seq,int ct_rr[], int wt_rr[]) {
-        String[] p = new String[]{"1","2","3","4","5","6"};
-        int copy_bt_arr[] = new int[n];
-        int copy_at_arr[] = new int[n];
-        int q=chart.timeQ;
-        System.out.println(q);
-        for (int x = 0; x < copy_bt_arr.length; x++) {
-            copy_bt_arr[x] = bt_arr[x];
-            copy_at_arr[x] = at_arr[x];
-        }
-        int t = 0;
-        while (true) {
-            boolean flag = true;
-            for (int x = 0; x < n; x++) {
-                if (copy_at_arr[x] <= t) {
-                    if (copy_at_arr[x] <= q) {
-                        if (copy_bt_arr[x] > 0) {
-                            flag = false;
-                            if (copy_bt_arr[x] > q) {
-                                // make decrease the bt_arr time
-                                t = t + q;
-                                copy_bt_arr[x] = copy_bt_arr[x] - q;
-                                copy_at_arr[x] = copy_at_arr[x] + q;
-                                seq.add(Integer.parseInt(p[x]));
-                            }
-                            else {
-                                // for last time
-                                t = t + copy_bt_arr[x];
-                                // store ct_rr time
-                                ct_rr[x] = t - at_arr[x];
-                                // store wait time
-                                wt_rr[x] = ct_rr[x] - bt_arr[x];
-                                copy_bt_arr[x] = 0;
-
-                                // add sequence
-                                seq.add(Integer.parseInt(p[x]));
-                            }
-                        }
-                    }
-
-                    /*
-                    else if (copy_at_arr[x] > q) {
-                        for (int j = 0; j < n; j++) {
-
-                            if (copy_at_arr[j] < copy_at_arr[x]) {
-                                if (copy_bt_arr[j] > 0) {
-                                    flag = false;
-                                    if (copy_bt_arr[j] > q) {
-                                        t = t + q;
-                                        copy_bt_arr[j] = copy_bt_arr[j] - q;
-                                        copy_at_arr[j] = copy_at_arr[j] + q;
-                                        seq.add(Integer.parseInt(p[j]));
-                                    }
-                                    else {
-                                        t = t + copy_bt_arr[j];
-                                        ct_rr[j] = t - at_arr[j];
-                                        wt_rr[j] = t - bt_arr[j] - at_arr[j];
-                                        copy_bt_arr[j] = 0;
-                                        seq.add(Integer.parseInt(p[j]));
-                                    }
-                                }
-                            }
-                        }
-
-                        // now the previous process according to
-                        // ith is process
-                        if (copy_bt_arr[x] > 0) {
-                            flag = false;
-
-                            // Check for greaters
-                            if (copy_bt_arr[x] > q) {
-                                t = t + q;
-                                copy_bt_arr[x] = copy_bt_arr[x] - q;
-                                copy_at_arr[x] = copy_at_arr[x] + q;
-                                seq.add(Integer.parseInt(p[x]));
-                            }
-                            else {
-                                t = t + copy_bt_arr[x];
-                                ct_rr[x] = t - at_arr[x];
-                                wt_rr[x] = t - bt_arr[x] - at_arr[x];
-                                copy_bt_arr[x] = 0;
-                                seq.add(Integer.parseInt(p[x]));
-                            }
-                        }
-                    }
-                    */
-                }
-
-                // if no process is come on thse critical
-                else if (copy_at_arr[x] > t) {
-                    t++;
-                    x--;
-                }
-            }
-            // for exit the while loop
-            if (flag) {
-                break;
-            }
-        }
-
     }
 
 }
