@@ -45,13 +45,13 @@ class cpuscheduling extends JFrame {
     private JLabel priority = new JLabel("Priority : ");
     private JLabel tq = new JLabel("Time Quantam : ");
 
-    private String[] proc = new String[]{"5", "2", "3", "1", "5", "6"};
+    private String[] proc = new String[]{"5", "2", "3", "1", "4", "6"};
     private JComboBox np = new JComboBox(proc);
 
     private Font fo = new Font("Serif", Font.BOLD, 14);
-    private JTextField bt_t = new JTextField("8,1,3,2,6", 30);
-    private JTextField at_t = new JTextField("0,1,2,3,4", 30);
-    private JTextField p_t = new JTextField("1,2,5,4,4", 30);
+    private JTextField bt_t = new JTextField("6,2,8,3,4", 30);
+    private JTextField at_t = new JTextField("2,5,1,0,4", 30);
+    private JTextField p_t = new JTextField("3,1,4,2,4", 30);
     private JTextField tq_t = new JTextField("3",5);
 
     private JCheckBox fcfs = new JCheckBox("FCFS");
@@ -236,7 +236,7 @@ class output_frame extends JFrame{
     }
 }
 class draw_graph extends JPanel{
-    int i=0,total_selected=0;
+    int i=0;
 
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     // the screen height
@@ -245,49 +245,25 @@ class draw_graph extends JPanel{
     double width = screenSize.getWidth();
 
     draw_graph(){
-
-        //JPanel div = new JPanel(new GridLayout(6,2,0,0));
-        JPanel div = new JPanel(new GridBagLayout());
-        div.setBorder(BorderFactory.createLineBorder(Color.black));
-        //div.setPreferredSize(new Dimension((int)height-50,(int)width));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill=GridBagConstraints.HORIZONTAL;
-        gbc.gridx=10;
-        gbc.gridy=0;
-        //div.add(new JLabel("."));
-        div.add(new JTextField(30),gbc);
-        //add(div);
-        height-=50;
-        System.out.println(height+"  "+width);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        total_selected=0;
-        /*commented out line to find total selected checkboxes
-        for(i=0;i<6;i++){
-            if(chart.checkbox[i]==1)
-                total_selected++;
-        }
-        */
-        total_selected=6;
         int y=0;
         int offset=50;
         int[] wt_fcfs=new int[chart.n];
         int[] tat_fcfs=new int[chart.n];
         int[] service_time = new int[chart.n];
         int[] copy_service = new int[chart.n+1];
-        for(i=0;i<total_selected;i++){
+        for(i=0;i<6;i++){
             Random rand = new Random();
             float rs = rand.nextFloat();
             float gs = rand.nextFloat();
             float bs = rand.nextFloat();
             g.setColor(Color.getHSBColor(rs,gs,bs));
-            //g.fillRect(0,y,(int)width,(int)(height/total_selected));
             g.drawLine(0,y,(int)width,(int)y);
-            y+=(height/total_selected);
+            y+=(height/6);
         }
         g.drawLine((int)width/2+50,0,(int)width/2+50,(int)height);
         //if FCFS is selected
@@ -309,12 +285,12 @@ class draw_graph extends JPanel{
                 float bs = rand.nextFloat();
                 g.setColor(Color.getHSBColor(rs,gs,bs));
                 System.out.println((int)(width*copy_service[i]/(2*sum)));
-                g.fillRect((int)(width*copy_service[i-1]/(2*sum)),0,(int)((width*copy_service[i]/(2*sum))-(width*copy_service[i-1]/(2*sum))),(int)((height/total_selected))-50);
+                g.fillRect((int)(width*copy_service[i-1]/(2*sum)),0,(int)((width*copy_service[i]/(2*sum))-(width*copy_service[i-1]/(2*sum))),(int)((height/6))-50);
                 g.setColor(Color.black);
-                g.drawString("P"+i+":"+service_time[i-1],(int)(width*copy_service[i-1]/(2*sum)),(int)((height/total_selected)-25));
+                g.drawString("P"+i+":"+service_time[i-1],(int)(width*copy_service[i-1]/(2*sum)),(int)((height/6)-25));
             }
             g.setColor(Color.black);
-            g.drawString(""+sum,(int)(width*copy_service[i-1]/(2*sum)),(int)((height/total_selected)-25));
+            g.drawString(""+sum,(int)(width*copy_service[i-1]/(2*sum)),(int)((height/6)-25));
             //Print of WT,AWT,TAT,ATAT
             g.drawString("Waiting Time: ",(int)((width/2)+5)+offset,20);
             int x=0;
@@ -578,7 +554,7 @@ class draw_graph extends JPanel{
                 System.out.println(s_at_arr[i]+" "+s_bt_arr[i]+" "+chart.bt_arr[i]+" "+chart.at_arr[i]);
                 p.add("P" + (i + 1));
             }
-            System.out.println(s_bt_arr[0]);
+            System.out.println("NNNNNNNNNNN IS "+chart.n);
             for(i=0;i<chart.n;i++){
                 for(int j=0;j<chart.n-i-1;j++){
                     if(s_bt_arr[j]>s_bt_arr[j+1]){
@@ -767,76 +743,10 @@ class draw_graph extends JPanel{
         if(chart.checkbox[2]==1){
             g.setColor(Color.black);
             g.drawString("SJF Preemptive",2,(int)(3*(height/6)-10));
-            int[] flag = new int[chart.n]; //checks if all are complete
-            int minValue= Integer.MAX_VALUE;
-            int short_index = 0; //To keep track of the process with the shortest burst time at that point of time
-            int[] comp_time = new int[chart.n]; //completion Time
-            int[] wt = new int[chart.n]; //Waiting time;
-            int ifFound=0;//checks if process with shortest job has been found
-            int flag_multiplier=0; //checks if all have completed
             ArrayList<Integer> pr = new ArrayList<>();
-            //ArrayList<Integer> seq_time = new ArrayList<>();
             int[] seq_time=new int[50]; //to get the sequence of preemptiveness
-            int k=0;//to keep track of sequence array
-
-            int[] copy_bt_arr = new int[chart.n]; //copy of orignal burst times
-            int t=0; // time
-            int[] processes = new int[]{1,2,3,4,5,6};
-
-            for(i=0;i<chart.n;i++){
-                copy_bt_arr[i]=chart.bt_arr[i];
-            }
-            while(flag_multiplier!=1) {
-                for (i = 0; i < chart.n; i++) {
-                    //find shortest job among the jobs in ready queue
-                    if ((chart.at_arr[i] <= t) && (copy_bt_arr[i] < minValue) && (copy_bt_arr[i] > 0)) {
-                        minValue = copy_bt_arr[i];
-                        short_index = i;
-                        ifFound = 1;
-                    }
-                }
-
-                if (ifFound == 0) {
-                    t++;
-                    continue;//increase the time quantam and skip to next iteration
-                }
-                copy_bt_arr[short_index]--;//decrease by one time quantam
-                if (pr.size() != 0) {
-                    if (pr.get(pr.size() - 1) != processes[short_index]) {
-                        pr.add(processes[short_index]);
-                        k++;
-                        seq_time[k]++;
-                    } else {
-                        seq_time[k]++;
-
-                    }
-
-                } else {
-                    pr.add(processes[short_index]);
-                    seq_time[k]++;
-                }
-
-                minValue = copy_bt_arr[short_index];
-                if (minValue == 0) {
-                    minValue = Integer.MAX_VALUE;
-                }
-                if (copy_bt_arr[short_index] == 0) {
-                    flag[short_index] = 1;
-                    ifFound = 0;
-                    comp_time[short_index] = t + 1;
-                    wt[short_index] = comp_time[short_index] - chart.bt_arr[short_index
-                            ] - chart.at_arr[short_index];
-                    if (wt[short_index] < 0)
-                        wt[short_index] = 0;
-                }
-                t++;
-
-
-                //Function to calculate flag multiplier
-                flag_multiplier = 1;
-                for (i = 0; i < flag.length; i++)
-                    flag_multiplier *= flag[i];
-            }
+            int[] wt = new int[chart.n]; //Waiting time;
+            preemptiveRR(wt,seq_time,pr);
 
             for(int i=0;seq_time[i]!=0;i++)
                 System.out.println(" Time of execution: "+seq_time[i]);
@@ -847,15 +757,17 @@ class draw_graph extends JPanel{
             for(i=0;i<chart.bt_arr.length;i++){
                 sum_bt+=chart.bt_arr[i];
             }
+            System.out.println("Sum_bt is: "+sum_bt);
             for(i=0;i<pr.size();i++){
                 Random rand = new Random();
                 float rs = rand.nextFloat();
                 float gs = rand.nextFloat();
                 float bs = rand.nextFloat();
                 g.setColor(Color.getHSBColor(rs,gs,bs));
-                //System.out.println((int)(width*copy_service[i]/(2*sum)));
+                System.out.println((int)width*sum_ft/(2*sum_bt));
                 g.fillRect((int)width*sum_ft/(2*sum_bt),(int)height/3,(int)((width*seq_time[i])/(2*sum_bt)),(int)((height/6))-50);
                 sum_ft+=seq_time[i];
+                System.out.println("Sum_ft is: "+sum_ft);
                 g.setColor(Color.black);
                 g.drawString("P"+pr.get(i)+" "+sum_ft,(int)((width*(sum_ft))/(2*sum_bt)),(int)(3*(height/6)-25));
             }
@@ -903,11 +815,220 @@ class draw_graph extends JPanel{
         if(chart.checkbox[4]==1){
             g.setColor(Color.black);
             g.drawString("Priority Preemptive",2,(int)(5*(height/6)-10));
+            int[] wt = new int[chart.n]; //Waiting time;
+            ArrayList<Integer> pr = new ArrayList<>();
+            int[] seq_time=new int[50]; //to get the sequence of preemptiveness
+            preemptivePriority(wt,seq_time,pr);
+
+            for(int i=0;seq_time[i]!=0;i++)
+                System.out.println(" Time of execution: "+seq_time[i]);
+            System.out.println("Order of execution: "+pr);
+
+            //printing graph starts here
+            int sum_bt,sum_ft;
+            sum_bt=0;
+            sum_ft=0;
+            for(i=0;i<chart.bt_arr.length;i++){
+                sum_bt+=chart.bt_arr[i];
+            }
+            for(i=0;i<pr.size();i++){
+                Random rand = new Random();
+                float rs = rand.nextFloat();
+                float gs = rand.nextFloat();
+                float bs = rand.nextFloat();
+                g.setColor(Color.getHSBColor(rs,gs,bs));
+                g.fillRect((int)width*sum_ft/(2*sum_bt),(int)(height*4)/6,(int)((width*seq_time[i])/(2*sum_bt)),(int)((height/6))-50);
+                sum_ft+=seq_time[i];
+                g.setColor(Color.black);
+                g.drawString("P"+pr.get(i)+" "+sum_ft,(int)((width*(sum_ft))/(2*sum_bt)),(int)(5*(height/6)-25));
+            }
+            g.setColor(Color.black);
+            //g.drawString(""+sum_bt,(int)((width*seq_time[i-1])/(2*sum_bt)),(int)(3*(height/6)-25));
+            //Print of WT,AWT,TAT,ATAT
+            g.drawString("Waiting Time: ",(int)((width/2)+5)+offset,20+(int)(height*4)/6);
+            int x=0;
+            for(i=0;i<wt.length;i++) {
+                x = i + 1;
+                g.drawString("P" + x + ":" + wt[i] + "  ", (int) (((width / 2)+50) + 100 * (i + 1))+offset, 20+(int)(height*4)/6);
+            }
+            g.drawString("Average WT: ",(int)((width/2)+5)+offset,40+(int)(height*4)/6);
+            double awt=0;
+            for (i=0;i<wt.length;i++){
+                awt+=wt[i];
+            }
+            System.out.println("awt is :"+awt);
+            awt=awt/chart.n;
+            g.drawString(awt+"",(int)((width/2)+150)+offset,40+(int)(height*4)/6);
+
+            //function to calculate TAT
+            int[] tat_sjfp = new int[chart.n];
+            for (int i = 0; i < chart.n; i++)
+                tat_sjfp[i] = chart.bt_arr[i] + wt[i];
+
+            g.drawString("Turn around Time: ",(int)((width/2)+5)+offset,60+(int)(height*4)/6);
+            for(i=0;i<tat_sjfp.length;i++) {
+                x = i + 1;
+                g.drawString("P" + x + ": " + tat_sjfp[i] + " ", (int) (((width / 2)+50) + 100 * (i + 1))+offset, 60+(int)(height*4)/6);
+            }
+            g.drawString("Average TAT: ",(int)((width/2)+5)+offset,80+(int)(height*4)/6);
+            double avg_tat_sjfp=0;
+            for (i=0;i<tat_sjfp.length;i++){
+                avg_tat_sjfp+=tat_sjfp[i];
+            }
+            System.out.println("avgtat is :"+avg_tat_sjfp);
+            avg_tat_sjfp=avg_tat_sjfp/chart.n;
+            g.drawString(avg_tat_sjfp+"",(int)((width/2)+150)+offset,80+(int)(height*4)/6);
+
+            sum_bt=0;
+            sum_ft=0;
         }
         //end of preemptive priority
     }
     //Paint Component ends over here
     //various function to calculate various components of different algorithms
+    void preemptiveRR(int[] wt,int[] seq_time,ArrayList<Integer> pr){
+        int[] flag = new int[chart.n]; //checks if all are complete
+        int minValue= Integer.MAX_VALUE;
+        int short_index = 0; //To keep track of the process with the shortest burst time at that point of time
+        int[] comp_time = new int[chart.n]; //completion Time
+
+        int ifFound=0;//checks if process with shortest job has been found
+        int flag_multiplier=0; //checks if all have completed
+
+        int k=0;//to keep track of sequence array
+
+        int[] copy_bt_arr = new int[chart.n]; //copy of orignal burst times
+        int t=0; // time
+        int[] processes = new int[]{1,2,3,4,5,6};
+
+        for(i=0;i<chart.n;i++){
+            copy_bt_arr[i]=chart.bt_arr[i];
+        }
+        while(flag_multiplier!=1) {
+            for (i = 0; i < chart.n; i++) {
+                //find shortest job among the jobs in ready queue
+                if ((chart.at_arr[i] <= t) && (copy_bt_arr[i] < minValue) && (copy_bt_arr[i] > 0)) {
+                    minValue = copy_bt_arr[i];
+                    short_index = i;
+                    ifFound = 1;
+                }
+            }
+
+            if (ifFound == 0) {
+                t++;
+                continue;//increase the time quantam and skip to next iteration
+            }
+            copy_bt_arr[short_index]--;//decrease by one time quantam
+            if (pr.size() != 0) {
+                if (pr.get(pr.size() - 1) != processes[short_index]) {
+                    pr.add(processes[short_index]);
+                    k++;
+                    seq_time[k]++;
+                } else {
+                    seq_time[k]++;
+
+                }
+
+            } else {
+                pr.add(processes[short_index]);
+                seq_time[k]++;
+            }
+
+            minValue = copy_bt_arr[short_index];
+            if (minValue == 0) {
+                minValue = Integer.MAX_VALUE;
+            }
+            if (copy_bt_arr[short_index] == 0) {
+                flag[short_index] = 1;
+                ifFound = 0;
+                comp_time[short_index] = t + 1;
+                wt[short_index] = comp_time[short_index] - chart.bt_arr[short_index
+                        ] - chart.at_arr[short_index];
+                if (wt[short_index] < 0)
+                    wt[short_index] = 0;
+            }
+            t++;
+
+
+            //Function to calculate flag multiplier
+            flag_multiplier = 1;
+            for (i = 0; i < flag.length; i++)
+                flag_multiplier *= flag[i];
+        }
+    }
+
+    void preemptivePriority(int[] wt,int[] seq_time,ArrayList<Integer> pr){
+        int[] flag = new int[chart.n]; //checks if all are complete
+        int minValue= Integer.MAX_VALUE;
+        int short_index = 0; //To keep track of the process with the shortest burst time at that point of time
+        int[] comp_time = new int[chart.n]; //completion Time
+
+        int ifFound=0;//checks if process with shortest job has been found
+        int flag_multiplier=0; //checks if all have completed
+
+        //ArrayList<Integer> seq_time = new ArrayList<>();
+
+        int k=0;//to keep track of sequence array
+        int[] pri = new int[chart.n];
+        int[] copy_bt_arr = new int[chart.n]; //copy of orignal burst times
+        int t=0; // time
+        int[] processes = new int[]{1,2,3,4,5,6};
+
+        for(i=0;i<chart.n;i++){
+            copy_bt_arr[i]=chart.bt_arr[i];
+            pri[i]=chart.pt_arr[i];
+        }
+        while(flag_multiplier!=1) {
+            for (i = 0; i < chart.n; i++) {
+                //find shortest job among the jobs in ready queue
+                if ((chart.at_arr[i] <= t) && (pri[i] < minValue) && (copy_bt_arr[i] > 0) && (flag[i]==0)) {
+                    minValue = pri[i];
+                    short_index = i;
+                    ifFound = 1;
+                }
+            }
+
+            if (ifFound == 0) {
+                t++;
+                continue;//increase the time quantam and skip to next iteration
+            }
+            copy_bt_arr[short_index]--;//decrease by one time quantam
+            if (pr.size() != 0) {
+                if (pr.get(pr.size() - 1) != processes[short_index]) {
+                    pr.add(processes[short_index]);
+                    k++;
+                    seq_time[k]++;
+                } else {
+                    seq_time[k]++;
+
+                }
+
+            } else {
+                pr.add(processes[short_index]);
+                seq_time[k]++;
+            }
+
+            minValue = Integer.MAX_VALUE;
+            if (copy_bt_arr[short_index] == 0) {
+                flag[short_index] = 1;
+                ifFound = 0;
+                comp_time[short_index] = t + 1;
+                wt[short_index] = comp_time[short_index] - chart.bt_arr[short_index
+                        ] - chart.at_arr[short_index];
+                if (wt[short_index] < 0)
+                    wt[short_index] = 0;
+            }
+            t++;
+
+
+            //Function to calculate flag multiplier
+            flag_multiplier = 1;
+            for (i = 0; i < flag.length; i++)
+                flag_multiplier *= flag[i];
+        }
+    t=0;
+    }
+
     void WaitTimeFCFS(int n, int bt_arr[], int at_arr[], int wt_fcfs[],int service_time[])
     {
         //service_time[] = new int[n];
