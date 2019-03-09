@@ -45,13 +45,13 @@ class cpuscheduling extends JFrame {
     private JLabel priority = new JLabel("Priority : ");
     private JLabel tq = new JLabel("Time Quantam : ");
 
-    private String[] proc = new String[]{"4", "2", "3", "1", "5", "6"};
+    private String[] proc = new String[]{"5", "2", "3", "1", "5", "6"};
     private JComboBox np = new JComboBox(proc);
 
     private Font fo = new Font("Serif", Font.BOLD, 14);
-    private JTextField bt_t = new JTextField("10,4,5,3", 30);
-    private JTextField at_t = new JTextField("0,1,2,3", 30);
-    private JTextField p_t = new JTextField("1,2,5,4", 30);
+    private JTextField bt_t = new JTextField("8,1,3,2,6", 30);
+    private JTextField at_t = new JTextField("0,1,2,3,4", 30);
+    private JTextField p_t = new JTextField("1,2,5,4,4", 30);
     private JTextField tq_t = new JTextField("3",5);
 
     private JCheckBox fcfs = new JCheckBox("FCFS");
@@ -80,6 +80,14 @@ class cpuscheduling extends JFrame {
     public chart() {
 
         //Designing GUI
+
+        //fcfs.setSelected(true);
+        //sjf.setSelected(true);
+        //rr.setSelected(true);
+        sjfp.setSelected(true);
+        //pp.setSelected(true);
+        //npp.setSelected(true);
+
         bt_t.setFont(fo);
         at_t.setFont(fo);
         p_t.setFont(fo);
@@ -171,6 +179,7 @@ class cpuscheduling extends JFrame {
             array=at_t.getText();
             temp = array.split("[,]");
             //if(at_t.getText().matches("^[0-9]*$")) {
+            System.out.println(temp.length);
                 for (int i = 0; i < temp.length; i++) {
                     at_arr[i] = Integer.parseInt(temp[i]);
                 }
@@ -307,7 +316,7 @@ class draw_graph extends JPanel{
             g.setColor(Color.black);
             g.drawString(""+sum,(int)(width*copy_service[i-1]/(2*sum)),(int)((height/total_selected)-25));
             //Print of WT,AWT,TAT,ATAT
-            g.drawString("Average Waiting Time: ",(int)((width/2)+5)+offset,20);
+            g.drawString("Waiting Time: ",(int)((width/2)+5)+offset,20);
             int x=0;
             for(i=0;i<wt_fcfs.length;i++) {
                 x = i + 1;
@@ -331,7 +340,7 @@ class draw_graph extends JPanel{
             g.drawString("Average TAT: ",(int)((width/2)+5)+offset,80);
             double avg_tat_fcfs=0;
             for (i=0;i<tat_fcfs.length;i++){
-                awt+=tat_fcfs[i];
+                avg_tat_fcfs+=tat_fcfs[i];
             }
             System.out.println("avgtat is :"+avg_tat_fcfs);
             avg_tat_fcfs=avg_tat_fcfs/chart.n;
@@ -520,11 +529,10 @@ class draw_graph extends JPanel{
             //Round Robin Graph Printing ends here
             for (i=0;i<tat_rr.length;i++)
                 System.out.println("tat rr: "+tat_rr[i]+" wait rr: "+wt_rr[i]);
-            //for(i=0;i<seq.length();i++)
-                System.out.println("Sequence is : "+seq);
+            System.out.println("Sequence is : "+seq);
             //Print of WT,AWT,TAT,ATAT
             g.setColor(Color.black);
-            g.drawString("Average Waiting Time: ",(int)((width/2)+5)+offset,20+(int)(height/6));
+            g.drawString("Waiting Time: ",(int)((width/2)+5)+offset,20+(int)(height/6));
             int x=0;
             for(i=0;i<wt_rr.length;i++) {
                 x = i + 1;
@@ -596,10 +604,10 @@ class draw_graph extends JPanel{
             //now that burst time has been sorted we can use fcfs logic to implement non preemptive sjf
             WaitTimeFCFS(chart.n,s_bt_arr,s_at_arr,wt_sjf,ser_sjf);
             TatFcfs(chart.n,s_bt_arr,wt_sjf,tat_sjf);
-
+            for (i=0;i<tat_sjf.length;i++)
+                System.out.println("tat_sjf: "+tat_sjf[i]+"Wait sjf: "+wt_sjf[i]+" process: "+p.get(i));
             //Graph drawing logic
             int height_offset=3*((int)height/6);
-
             int sum=ser_sjf[ser_sjf.length-1]+s_bt_arr[chart.n-1];
             System.out.println(sum);
             for(i=0;i<ser_sjf.length;i++){
@@ -620,7 +628,7 @@ class draw_graph extends JPanel{
             g.setColor(Color.black);
             g.drawString(""+sum,(int)(width*copy_service[i-1]/(2*sum)),(int)(4*(height/6)-25));
             //Print of WT,AWT,TAT,ATAT
-            g.drawString("Average Waiting Time: ",(int)((width/2)+5)+offset,20+height_offset);
+            g.drawString("Waiting Time: ",(int)((width/2)+5)+offset,20+height_offset);
             int x=0;
             for(i=0;i<wt_sjf.length;i++) {
                 x = i + 1;
@@ -650,7 +658,253 @@ class draw_graph extends JPanel{
             g.drawString(avg_tat_sjf+"",(int)((width/2)+150)+offset,80+height_offset);
 
         }//End of if for sjf_non preemptive
+        //check if non primitive priority is selected
+        if(chart.checkbox[5]==1){
+            g.setColor(Color.black);
+            g.drawString("Priority NonPreemptive",2,(int)(6*(height/6)-30));
+            int[] s_bt_arr=new int[chart.n];
+            int[] s_at_arr=new int[chart.n];
+            int[] wt_p=new int[chart.n];
+            int[] ser_p=new int[chart.n];
+            int[] tat_p=new int[chart.n];
+            int[] pri = new int[chart.n];
+            int swap_b,swap_a,swap_d;
+            String swap_c = new String();
 
+            ArrayList<String> p = new ArrayList<>();
+            for(i=0;i<chart.n;i++) {
+                pri[i]= chart.pt_arr[i];
+                s_bt_arr[i]=chart.bt_arr[i];
+                s_at_arr[i]=chart.at_arr[i];
+                System.out.println(s_at_arr[i]+" "+s_bt_arr[i]+" "+chart.bt_arr[i]+" "+chart.at_arr[i]);
+                p.add("P" + (i + 1));
+            }
+            System.out.println(s_bt_arr[0]);
+            for(i=0;i<chart.n;i++){
+                for(int j=0;j<chart.n-i-1;j++){
+                    if(pri[j]>pri[j+1]){
+                        swap_b = s_bt_arr[j];
+                        swap_a = s_at_arr[j];
+                        swap_c = p.get(j);
+                        swap_d = pri[j];
+
+                        s_bt_arr[j]=s_bt_arr[j+1];
+                        s_at_arr[j]=s_at_arr[j+1];
+                        p.set(j,p.get(j+1));
+                        pri[j]=pri[j+1];
+
+                        s_bt_arr[j+1] = swap_b;
+                        s_at_arr[j+1] = swap_a;
+                        pri[j+1] = swap_d;
+                        p.set(j+1,swap_c);
+
+                    }
+                }
+            }
+            //check weather all of them are sorted nicely
+            for (i=0;i<chart.n;i++){
+                System.out.println("bt : "+s_bt_arr[i]+"  at : "+s_at_arr[i]+"  process : "+p.get(i)+" priority: "+pri[i]);
+            }
+            //now that burst time has been sorted we can use fcfs logic to implement non preemptive sjf
+            WaitTimeFCFS(chart.n,s_bt_arr,s_at_arr,wt_p,ser_p);
+            TatFcfs(chart.n,s_bt_arr,wt_p,tat_p);
+
+            //Graph drawing logic
+            int height_offset=5*((int)height/6);
+
+            int sum=ser_p[ser_p.length-1]+s_bt_arr[chart.n-1];
+            System.out.println(sum);
+            for(i=0;i<ser_p.length;i++){
+                copy_service[i]=ser_p[i];
+            }
+            copy_service[i]=sum;
+            for(i=1;i<copy_service.length;i++){
+                Random rand = new Random();
+                float rs = rand.nextFloat();
+                float gs = rand.nextFloat();
+                float bs = rand.nextFloat();
+                g.setColor(Color.getHSBColor(rs,gs,bs));
+                System.out.println((int)(width*copy_service[i]/(2*sum)));
+                g.fillRect((int)(width*copy_service[i-1]/(2*sum)),height_offset,(int)((width*copy_service[i]/(2*sum))-(width*copy_service[i-1]/(2*sum))),(int)((height/6))-50);
+                g.setColor(Color.black);
+                g.drawString(p.get(i-1)+":"+ser_p[i-1],(int)(width*copy_service[i-1]/(2*sum)),(int)(6*(height/6)-40));
+            }
+            g.setColor(Color.black);
+            g.drawString(""+sum,(int)(width*copy_service[i-1]/(2*sum)),(int)(6*(height/6)-40));
+            //Print of WT,AWT,TAT,ATAT
+            g.drawString("Waiting Time: ",(int)((width/2)+5)+offset,20+height_offset);
+            int x=0;
+            for(i=0;i<wt_p.length;i++) {
+                x = i + 1;
+                g.drawString(p.get(i)+":" + wt_p[i] + "  ", (int) (((width / 2)+50) + 100 * (i + 1))+offset, 20+height_offset);
+            }
+            g.drawString("Average WT: ",(int)((width/2)+5)+offset,40+height_offset);
+            double awt=0;
+            for (i=0;i<wt_p.length;i++){
+                awt+=wt_p[i];
+            }
+            System.out.println("awt is :"+awt);
+            awt=awt/chart.n;
+            g.drawString(awt+"",(int)((width/2)+150)+offset,40+height_offset);
+
+
+            g.drawString("Turn around Time: ",(int)((width/2)+5)+offset,60+height_offset);
+            for(i=0;i<wt_p.length;i++) {
+                g.drawString(p.get(i) +":"+ tat_p[i] + " ", (int) (((width / 2)+50) + 100 * (i + 1))+offset, 60+height_offset);
+            }
+            g.drawString("Average TAT: ",(int)((width/2)+5)+offset,80+height_offset);
+            double avg_tat_p=0;
+            for (i=0;i<tat_p.length;i++){
+                avg_tat_p+=tat_p[i];
+            }
+            System.out.println("avgtat is :"+avg_tat_p);
+            avg_tat_p=avg_tat_p/chart.n;
+            g.drawString(avg_tat_p+"",(int)((width/2)+150)+offset,80+height_offset);
+
+        }//End of if for priority non preemptive
+
+        //check if sjf preemptive is selected
+        if(chart.checkbox[2]==1){
+            g.setColor(Color.black);
+            g.drawString("SJF Preemptive",2,(int)(3*(height/6)-10));
+            int[] flag = new int[chart.n]; //checks if all are complete
+            int minValue= Integer.MAX_VALUE;
+            int short_index = 0; //To keep track of the process with the shortest burst time at that point of time
+            int[] comp_time = new int[chart.n]; //completion Time
+            int[] wt = new int[chart.n]; //Waiting time;
+            int ifFound=0;//checks if process with shortest job has been found
+            int flag_multiplier=0; //checks if all have completed
+            ArrayList<Integer> pr = new ArrayList<>();
+            //ArrayList<Integer> seq_time = new ArrayList<>();
+            int[] seq_time=new int[50]; //to get the sequence of preemptiveness
+            int k=0;//to keep track of sequence array
+
+            int[] copy_bt_arr = new int[chart.n]; //copy of orignal burst times
+            int t=0; // time
+            int[] processes = new int[]{1,2,3,4,5,6};
+
+            for(i=0;i<chart.n;i++){
+                copy_bt_arr[i]=chart.bt_arr[i];
+            }
+            while(flag_multiplier!=1) {
+                for (i = 0; i < chart.n; i++) {
+                    //find shortest job among the jobs in ready queue
+                    if ((chart.at_arr[i] <= t) && (copy_bt_arr[i] < minValue) && (copy_bt_arr[i] > 0)) {
+                        minValue = copy_bt_arr[i];
+                        short_index = i;
+                        ifFound = 1;
+                    }
+                }
+
+                if (ifFound == 0) {
+                    t++;
+                    continue;//increase the time quantam and skip to next iteration
+                }
+                copy_bt_arr[short_index]--;//decrease by one time quantam
+                if (pr.size() != 0) {
+                    if (pr.get(pr.size() - 1) != processes[short_index]) {
+                        pr.add(processes[short_index]);
+                        k++;
+                        seq_time[k]++;
+                    } else {
+                        seq_time[k]++;
+
+                    }
+
+                } else {
+                    pr.add(processes[short_index]);
+                    seq_time[k]++;
+                }
+
+                minValue = copy_bt_arr[short_index];
+                if (minValue == 0) {
+                    minValue = Integer.MAX_VALUE;
+                }
+                if (copy_bt_arr[short_index] == 0) {
+                    flag[short_index] = 1;
+                    ifFound = 0;
+                    comp_time[short_index] = t + 1;
+                    wt[short_index] = comp_time[short_index] - chart.bt_arr[short_index
+                            ] - chart.at_arr[short_index];
+                    if (wt[short_index] < 0)
+                        wt[short_index] = 0;
+                }
+                t++;
+
+
+                //Function to calculate flag multiplier
+                flag_multiplier = 1;
+                for (i = 0; i < flag.length; i++)
+                    flag_multiplier *= flag[i];
+            }
+
+            for(int i=0;seq_time[i]!=0;i++)
+                System.out.println(" Time of execution: "+seq_time[i]);
+            System.out.println("Order of execution: "+pr);
+
+            //printing graph starts here
+            int sum_bt=0,sum_ft=0;
+            for(i=0;i<chart.bt_arr.length;i++){
+                sum_bt+=chart.bt_arr[i];
+            }
+            for(i=0;i<pr.size();i++){
+                Random rand = new Random();
+                float rs = rand.nextFloat();
+                float gs = rand.nextFloat();
+                float bs = rand.nextFloat();
+                g.setColor(Color.getHSBColor(rs,gs,bs));
+                //System.out.println((int)(width*copy_service[i]/(2*sum)));
+                g.fillRect((int)width*sum_ft/(2*sum_bt),(int)height/3,(int)((width*seq_time[i])/(2*sum_bt)),(int)((height/6))-50);
+                sum_ft+=seq_time[i];
+                g.setColor(Color.black);
+                g.drawString("P"+pr.get(i)+" "+sum_ft,(int)((width*(sum_ft))/(2*sum_bt)),(int)(3*(height/6)-25));
+            }
+            g.setColor(Color.black);
+            //g.drawString(""+sum_bt,(int)((width*seq_time[i-1])/(2*sum_bt)),(int)(3*(height/6)-25));
+            //Print of WT,AWT,TAT,ATAT
+            g.drawString("Waiting Time: ",(int)((width/2)+5)+offset,20+(int)height/3);
+            int x=0;
+            for(i=0;i<wt.length;i++) {
+                x = i + 1;
+                g.drawString("P" + x + ":" + wt[i] + "  ", (int) (((width / 2)+50) + 100 * (i + 1))+offset, 20+(int)height/3);
+            }
+            g.drawString("Average WT: ",(int)((width/2)+5)+offset,40+(int)height/3);
+            double awt=0;
+            for (i=0;i<wt.length;i++){
+                awt+=wt[i];
+            }
+            System.out.println("awt is :"+awt);
+            awt=awt/chart.n;
+            g.drawString(awt+"",(int)((width/2)+150)+offset,40+(int)height/3);
+
+            //function to calculate TAT
+            int[] tat_sjfp = new int[chart.n];
+            for (int i = 0; i < chart.n; i++)
+                tat_sjfp[i] = chart.bt_arr[i] + wt[i];
+
+            g.drawString("Turn around Time: ",(int)((width/2)+5)+offset,60+(int)height/3);
+            for(i=0;i<tat_sjfp.length;i++) {
+                x = i + 1;
+                g.drawString("P" + x + ": " + tat_sjfp[i] + " ", (int) (((width / 2)+50) + 100 * (i + 1))+offset, 60+(int)height/3);
+            }
+            g.drawString("Average TAT: ",(int)((width/2)+5)+offset,80+(int)height/3);
+            double avg_tat_sjfp=0;
+            for (i=0;i<tat_sjfp.length;i++){
+                avg_tat_sjfp+=tat_sjfp[i];
+            }
+            System.out.println("avgtat is :"+avg_tat_sjfp);
+            avg_tat_sjfp=avg_tat_sjfp/chart.n;
+            g.drawString(avg_tat_sjfp+"",(int)((width/2)+150)+offset,80+(int)height/3);
+
+        }
+        //end of sjf preemptive
+
+        //Check if preemptive priority is selected
+        if(chart.checkbox[4]==1){
+            g.setColor(Color.black);
+            g.drawString("Priority Preemptive",2,(int)(5*(height/6)-10));
+        }
+        //end of preemptive priority
     }
     //Paint Component ends over here
     //various function to calculate various components of different algorithms
