@@ -9,14 +9,14 @@ Project as a part of OS course, Uses popular CPU scheduling algorithms and obtai
 * Priority - Non Preemptive
 
 
-####Inputs
+### Inputs
 - Number of Processes( Max: 6) //could be changed in the code
 - Burst Time
 - Arrival Time
 - Time Quantam
 
 
-####Outputs
+### Outputs
 - Gantt Chart
 - Execution Time
 - Waiting Time for each process
