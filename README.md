@@ -23,3 +23,6 @@ Project as a part of OS course, Uses popular CPU scheduling algorithms and obtai
 - Average waiting Time
 - Turn aroound Time
 - Average Turn around Time
+
+
+ *@ contributors : @Dev_eloperr*
